@@ -49,7 +49,7 @@ def solve2(start,target):
 
         # Pop the next node
         start, target, cuts = q.popleft()
-        
+
         # Create key of this exact situation
         # Use tuple, sort to ensure e.g. (2,3) and (3,2) are not different states 
         key = (tuple(sorted(start)),tuple(sorted(target)))

@@ -9,11 +9,17 @@
 # - pop(0) is expensive (shifts everything left)
 # ---------------------------------------------------------- 
 
+# # Start array (m chocolate bars)
+# start = [2,5,7]
+# # Target array (n hungry children)
+# target = [4,3,2,1]
+
 # Testing getting distinct pairs that add up to elements in start
 # NOTE EARLY: this is big loop for large m or s
 # for s in start:
 #     for i in range(1, s // 2 + 1):
 #         print(s,i,s-i)
+# exit()
 
 # Solve function 1 - takes start and target as input
 def solve1(start,target):
