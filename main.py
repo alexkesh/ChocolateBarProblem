@@ -4,6 +4,7 @@ import numpy as np
 # Import solve functions
 from solve1 import solve1
 from solve2 import solve2
+from solve3 import solve3
 
 # Test arrays
 states = [
@@ -52,6 +53,8 @@ for start,target in states:
     print(f"start = {start}, target = {target}")
     # cuts,mean_time = exec_timer(solve1(start,target),n) 
     # print(f"solve 1 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
-    cuts,mean_time = exec_timer(solve2(start,target),n) 
-    print(f"solve 2 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
+    # cuts,mean_time = exec_timer(solve2(start,target),n) 
+    # print(f"solve 2 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
+    cuts,mean_time = exec_timer(solve3(start,target),n) 
+    print(f"solve 3 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
 

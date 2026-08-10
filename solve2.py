@@ -1,7 +1,7 @@
 # ----------------------------------------------------------
 # ATTEMPT 2
 # Thoughts after second attempt:
-# - Major issue here is that for large input, the combinatorics grow exponentially
+# - Major issue here is that for large input, BFS complexity grow exponentially
 # - Tests show programmed seemed to hang, but debug below showed queue was not emptying and visited growing
 # - Seems to be this is exactly what problem was warning about:
 # - "(more interested in solutions that get close to the minimum than that take an exponential amount of time."
