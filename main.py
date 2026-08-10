@@ -5,7 +5,6 @@ import numpy as np
 from solve1 import solve1
 from solve2 import solve2
 
-
 # Test arrays
 states = [
     [[6],[6]], # No cuts needed
@@ -13,7 +12,7 @@ states = [
     [[2, 5, 7],[4, 3, 2, 1]], # Provided example
     [[10, 15],[5, 5, 10, 5]], # Matching sum
     [[50, 30, 20],[10, 10, 10, 10, 10, 10, 10, 10, 10,10]], # Large matching sum, lots of children, all duplicates
-    [[23, 47, 31, 19, 12],[5, 7, 3, 9, 11, 13, 17, 2, 4, 6, 8, 10]], # Large start and target
+    [[23, 47, 31, 19, 12],[5, 7, 3, 9, 11, 13, 17, 2, 4, 6, 8, 10]], # Very large inputs
     [[4, 4],[3, 3, 2]] # No solution
 ]                
 

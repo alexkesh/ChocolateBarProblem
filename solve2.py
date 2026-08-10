@@ -1,7 +1,10 @@
 # ----------------------------------------------------------
 # ATTEMPT 2
 # Thoughts after second attempt:
-# -
+# - Major issue here is that for large input, the combinatorics grow exponentially
+# - Tests show programmed seemed to hang, but debug below showed queue was not emptying and visited growing
+# - Seems to be this is exactly what problem was warning about:
+# - "(more interested in solutions that get close to the minimum than that take an exponential amount of time."
 # ---------------------------------------------------------- 
 
 from collections import deque
@@ -23,6 +26,8 @@ from collections import deque
 #         print(s,i,s-i)
 # exit()
 
+# Debug print flag
+debug = False
 
 # Solve function 2 - takes start and target as input
 def solve2(start,target):
@@ -44,22 +49,33 @@ def solve2(start,target):
     # Create a set (no duplicates) for visited
     visited = set()
     
+    # DEBUG - For debugging apparent hang...
+    counter = 0
+    
     # Search whole the queue length is non-zerp
     while (len(q) > 0):
 
+        # DEBUG - incrmeent counter
+        counter += 1
+
+        # DEBUG - print
+        if debug and counter % 5000 == 0:
+            print(f"count={counter}, queue={len(q)}, visited={len(visited)}, cuts={cuts}")
+        
         # Pop the next node
         start, target, cuts = q.popleft()
 
-        # Create key of this exact situation
-        # Use tuple, sort to ensure e.g. (2,3) and (3,2) are not different states 
-        key = (tuple(sorted(start)),tuple(sorted(target)))
+        # MOVE THIS TO JUST BEFORE QUEUE PUSH TO STOP DUPLICATES STATES FROM ENTERING THE QUEUE
+        # # Create key of this exact situation
+        # # Use tuple, sort to ensure e.g. (2,3) and (3,2) are not different states 
+        # key = (tuple(sorted(start)),tuple(sorted(target)))
 
-        # If this key already in the visited set...
-        if key in visited:
-            # skip
-            continue
-        # Else, add the key to visited
-        visited.add(key)
+        # # If this key already in the visited set...
+        # if key in visited:
+        #     # skip
+        #     continue
+        # # Else, add the key to visited
+        # visited.add(key)
         
         # Make a copy of the start (values remaining to find)
         remaining = start.copy()
@@ -93,9 +109,19 @@ def solve2(start,target):
             candidates = set(t for t in target if 0 < t < s)    
             for j in candidates:
                 # Create a new node to trial including
-                trial = remaining[:i] + [j, s-j] + remaining[i+1:]
+                trial_start = remaining[:i] + [j, s-j] + remaining[i+1:]
+                # Create key of trial
+                # Use tuple, sort to ensure e.g. (2,3) and (3,2) are not different states
+                trial_target = target.copy()
+                trial_key = (tuple(sorted(trial_start)),tuple(sorted(trial_target)))                
+                # If this key already in the visited set...
+                if trial_key in visited:
+                    # skip
+                    continue
+                # Else, add the key to visited
+                visited.add(trial_key) 
                 # Append this node to the queue (incrementing cuts)
-                q.append((trial,target.copy(),cuts+1))
+                q.append((trial_start,trial_target,cuts+1))
 
     # No solution
     return None
