@@ -1,10 +1,19 @@
 # ----------------------------------------------------------
 # ATTEMPT 1
 # Thoughts after first attempt:
-# - Needs to handle no soultion
+# - j in range(1, s // 2 + 1) improvement --> not ever pair [j, s-j] is going to valid in target 
+# - Needs visited 
+# - Needs to handle no solution (global and skip solutionless branches)
+# - Does sorting start actually do anything?
+# - Should probably deal with any 1s in the array (skip)
 # - pop(0) is expensive (shifts everything left)
-# - Can probably deal with any 1s in the array (skip)
 # ---------------------------------------------------------- 
+
+# Testing getting distinct pairs that add up to elements in start
+# NOTE EARLY: this is big loop for large m or s
+# for s in start:
+#     for i in range(1, s // 2 + 1):
+#         print(s,i,s-i)
 
 # Solve function 1 - takes start and target as input
 def solve1(start,target):

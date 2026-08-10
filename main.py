@@ -1,8 +1,9 @@
 import time
 import numpy as np
 
-# Import solve function
+# Import solve functions
 from solve1 import solve1
+from solve2 import solve2
 
 # Start array (m chocolate bars)
 start = [2,5,7]
@@ -10,10 +11,13 @@ start = [2,5,7]
 target = [4,3,2,1]
 # Number of times to get repeat execution for average time
 n = 10
+
 # Testing getting distinct pairs that add up to elements in start
+# NOTE EARLY: this is big loop for large m or s
 # for s in start:
 #     for i in range(1, s // 2 + 1):
 #         print(s,i,s-i)
+# exit()
 
 # Execute function n times and average execution time
 def exec_timer(func,n):
@@ -45,6 +49,8 @@ def exec_timer(func,n):
     return cuts, mean_time
 
 
-cuts,time = exec_timer(solve1(start,target),n) 
-print(f"solve 1 results: number of cuts = {cuts}, avg time take for {n} reps = {time*1e6} us")
+cuts,mean_time = exec_timer(solve1(start,target),n) 
+print(f"solve 1 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
+cuts,mean_time = exec_timer(solve2(start,target),n) 
+print(f"solve 2 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
 
