@@ -6,8 +6,6 @@ from solve1 import solve1
 from solve2 import solve2
 from solve3 import solve3
 from solve4 import solve4
-from solve5 import solve5
-from solve6 import solve6
 
 # Test arrays
 states = [
@@ -63,8 +61,5 @@ for start,target in states:
     # cuts,mean_time = exec_timer(solve3(start,target),n) 
     # print(f"solve 3 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
     cuts,mean_time,max_time = exec_timer(solve4(start,target),n) 
-    print(f"\tsolve 4 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
-    cuts,mean_time,max_time = exec_timer(solve5(start,target),n) 
-    print(f"\tsolve 5 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us, max_time = {max_time*1e6}")
-    cuts,mean_time,max_time = exec_timer(solve6(start,target),n) 
-    print(f"\tsolve 6 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us, max_time = {max_time*1e6}")
+    print(f"\tsolve 4 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6:.4f} us, max time = {max_time*1e6:.4f} us")
+B

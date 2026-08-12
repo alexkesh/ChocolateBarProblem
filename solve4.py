@@ -92,9 +92,9 @@ def solve4(start, target):
     if target_sum > start_sum:
         return None
 
-    # Add dummy target for unused chocolate
-    if start_sum > target_sum:
-        target.append(start_sum - target_sum)
+    # # Add dummy target for unused chocolate
+    # if start_sum > target_sum:
+    #     target.append(start_sum - target_sum)
 
     # Continue while there are still targets (including dummy)
     while target:
@@ -119,7 +119,16 @@ def solve4(start, target):
             continue
 
         # 3) Look for the 1 cut case of one start = two targets
-        match = two_sum(target, start)
+        # Here, calculate and inlcude dummy target for currently unused chocolate
+        dummy = sum(start) - sum(target)
+        # Copy target to temporarily include dummy
+        target_with_dummy = target.copy()
+        # If there is going to be unused chocolate
+        if dummy > 0:
+            # Add dummy to temporary target
+            target_with_dummy.append(dummy)
+        # Look for a two-sum including dummy (where the dummy can satisfy the two-sum)
+        match = two_sum(target_with_dummy, start)
         # If a two-sum has been found
         if match is not None:
             # Get two-sum match indices
@@ -127,24 +136,31 @@ def solve4(start, target):
             # Remove start
             start.pop(k)
             # Remove corresponding two targets
-            for index in sorted((i, j), reverse=True): target.pop(index)
+            for index in sorted((i, j), reverse=True):
+                # Only remove if this is a real target (not dummy)
+                if index < len(target):
+                    target.pop(index)
             # Increment number of cuts by 1
             cuts += 1
             # State-change: go back to step 1)
             continue
 
-        # 4) Choose the largest remaining target
+        # 4) Approximate remaining chocolate distribution from large to small
+
+        # Find the index of the largest remaining target
         t_index = max(range(len(target)),key=lambda i: target[i])
+        # Find the value of the largest remaining target
         t = target[t_index]
 
         # 4.a) First preference: 0  cuts.
+        # Find all the indices of all values in start less than the largest target
         candidates = [i for i, s in enumerate(start) if s < t]
+        # If they exist...
         if candidates:
-            # Choose the largest bar which fits
+            # Find the index in candidates that corresponds to the largest value in start
             i = max(candidates,key=lambda i: start[i])
-            # Remove from start
+            # Give the whole bar to this child. Remove from start.
             s = start.pop(i)
-            # Give the whole bar to this child.
             # The child still needs t - s.
             target[t_index] -= s
             # State-change: go back to step 1) 
@@ -154,27 +170,26 @@ def solve4(start, target):
         # 4.b) Second preference: 1 cut.
         # Find the smallest bar larger than target and cut
         # exactly what we need from it.
+        # Find all the indices of all values in start larger than the largest target 
         candidates = [i for i, s in enumerate(start) if s > t]
+        # If they exist...
         if candidates:
-            # Best fit: smallest bar large enough
+            # Find the index in candidates that corresponds to the smallest value in start
             i = min(candidates,key=lambda i: start[i])
-            # Remove from start
-            s = start.pop(i)
-            # Amount left after cutting off target
-            remainder = s - t
-            # Remove from target
-            # This target is now completely satisfied
+            # Cut target amount from bar, leaving the remainder
+            start[i] -= t            
+            # Remove from target. This child is now completely satisfied.
             target.pop(t_index)
-            # Put unused part of bar back into start
-            start.append(remainder)
             # One cut
             cuts += 1
             # State-change: go back to step 1) 
             continue
 
 
-        # With balanced positive integer inputs this
-        # shouldn't be reached
-        return None
+        # This shouldn't be reached
+        raise RuntimeError(
+            "Solve4 reached impossible state. "
+            f"start={start}, target={target}, dummy={dummy}"
+        )
 
     return cuts
