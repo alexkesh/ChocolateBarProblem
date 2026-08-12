@@ -9,14 +9,15 @@
 # - The implementation gives an approximate solultion, but avoids exponential time
 # - Iteratively finds a locally best choice, instead of the globally best one.
 # - Answers seem to be correct for less complicated cases.
-# - Thoughts to improve further: weight search towards finding target/pair/more that sum to one bar.
-# 
+# - Thoughts to improve further: weight search towards matching target/pair/more that sum to one bar. 
 # ***************************** 
 # NOTE: Received Jake's reply on 11/08/26 to questions about assumptions/constraints.
 # In all solutions thus far (including solve3) I had assumed based on the provided example that
 # a child's amount should come from a single piece. This is NOT a requirement!
 # To reach a target value, a child can be given several smaller pieces, and those can come from different bars.
 # This reframes the problem, and requires a new solution...
+# For example, start = [3,3] and target = [6] returns None here.
+# (All other implemented assumptions and constraints correct)
 # *****************************
 # 
 # ---------------------------------------------------------- 
