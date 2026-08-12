@@ -146,6 +146,7 @@ def solve4(start, target):
             continue
 
         # 4) Approximate remaining chocolate distribution from large to small
+        # Local optimisation - not global solution
 
         # Find the index of the largest remaining target
         t_index = max(range(len(target)),key=lambda i: target[i])

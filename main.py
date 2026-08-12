@@ -24,7 +24,7 @@ states = [
 n = 100
 
 # Execute function n times and average execution time
-def exec_timer(func,n):
+def exec_timer(func,start,target,n):
     # List of times taken
     times = []
     # Initialise check value
@@ -34,10 +34,10 @@ def exec_timer(func,n):
         # Get t0
         t0 = time.perf_counter()
         # Calculate number of cuts
-        cuts = func
+        cuts = func(start,target)
         # Get end time
         t1 = time.perf_counter()
-        # Calcluate time
+        # Calculate time
         times.append(t1-t0)
         # Check for same answer every time
         if (i == 0):
@@ -47,9 +47,11 @@ def exec_timer(func,n):
             # If value does not = check value, give critical error
             if (check != cuts):
                 raise RuntimeError(f"Critical error: inconsistent cuts — expected {check}, got {cuts}")
+
     # Get mean time taken
     mean_time = np.mean(times)
-    # Return number of cuts and mean time
+
+    # Return number of cuts, mean time and maximum time
     return cuts, mean_time, max(times)
 
 for start,target in states:
@@ -58,8 +60,8 @@ for start,target in states:
     # print(f"solve 1 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
     # cuts,mean_time = exec_timer(solve2(start,target),n) 
     # print(f"solve 2 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
-    # cuts,mean_time = exec_timer(solve3(start,target),n) 
-    # print(f"solve 3 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
-    cuts,mean_time,max_time = exec_timer(solve4(start,target),n) 
+    cuts,mean_time,max_time = exec_timer(solve3,start,target,n) 
+    print(f"solve 3 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us, max time = {max_time*1e6:.4f} us")
+    cuts,mean_time,max_time = exec_timer(solve4,start,target,n)
     print(f"\tsolve 4 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6:.4f} us, max time = {max_time*1e6:.4f} us")
 B
