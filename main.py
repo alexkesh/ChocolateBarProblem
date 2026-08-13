@@ -22,7 +22,7 @@ states = [
     [[4, 4],[3, 3, 2]],
     # [[2],[1,1,1]], # Not enough chocolate for all children to fairly get some - TO TEST ONLY FAILURE MODE!!
     [[50, 30, 20],[10, 10, 10, 10, 10, 10, 10, 10, 10,10]], # Large matching sum, lots of children, all duplicates
-    [[23, 47, 31, 19, 12],[5, 7, 3, 9, 11, 13, 17, 2, 4, 6, 8, 10]] # Very large inputs
+    #[[23, 47, 31, 19, 12],[5, 7, 3, 9, 11, 13, 17, 2, 4, 6, 8, 10]] # Very large inputs
 ]                
 
 # Implemented soultions
@@ -31,7 +31,7 @@ solutions = {
     # "solve2" : solve2, # Global solution: exponential time, incorrectly implemented assumption (Jake, 11/08/26)
     # "solve3" : solve3, # Approximate solution: improved time, incorrectly implemented assumption (Jake, 11/08/26)
     "solve4" : solve4, # Approximate solution: improved time, correct assumptions (BEST SOLUTION)
-    #"solve5" : solve5 # Global solution: exponential time, correct assumptions
+    "solve5" : solve5 # Global solution: exponential time, correct assumptions
     }
 
 # Number of times to get repeat execution for average time
@@ -77,7 +77,10 @@ for start,target in states:
         result,mean_time,max_time = exec_timer(func,start,target,n)
         print(f"\t{name} results: {result}")
         print(f"\t                 avg time take for {n} reps = {mean_time*1e6:.4f} us, max time = {max_time*1e6:.4f} us")
-        
 
-run_analysis(max_n=30,n_tests=1000,seed=None)
-#test_fixed_ratio(max_m=30,n_tests=1000,seed=None)
+# Analyse solve4 for large m/n
+run_analysis(list(solutions.items())[0],max_n=30,n_tests=1000,seed=None)
+
+# Analyse solve4 vs solve5 for small m/n
+run_analysis(list(solutions.items()),max_n=5,max_m=5,n_tests=10000,seed=None)
+
