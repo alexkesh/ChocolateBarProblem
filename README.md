@@ -4,7 +4,18 @@ This repository contains my solution to the chocolate bar cutting problem. Given
 
 The main solution is `solve4.py`. It uses a fast greedy approximation intended to remain practical as the inputs grow. `solve5.py` provides an exact reference solution for smaller cases, where an exhaustive search is still computationally feasible. The earlier solver files have been retained to show how the approach developed as I tested the problem and clarified its assumptions.
 
-## Problem interpretation
+## Contents
+
+1. [Problem interpretation](#1-problem-interpretation)
+2. [Current approach](#2-current-approach)
+3. [Repository structure](#3-repository-structure)
+4. [File descriptions and connections](#4-file-descriptions-and-connections)
+5. [Running the code](#5-running-the-code)
+6. [Using the solvers directly](#6-using-the-solvers-directly)
+7. [Trade-off](#7-trade-off)
+8. [Analysis findings](#8-analysis-findings)
+
+## 1. Problem interpretation
 
 I explicitly checked the following assumptions and constraints with Jake:
 
@@ -29,7 +40,7 @@ For the final point, I chose to handle an infeasible total request as follows:
 
 The important clarification is that one child's allocation does not need to come from one contiguous piece or one starting bar. For example: {start = [3,3], target = [6]} requires no cuts: both complete bars can be given to the same child. This clarification invalidated a restriction used in `solve1.py`, `solve2.py` and `solve3.py`, and motivated the current implementations.
 
-## Current approach
+## 2. Current approach
 
 ### Approximate solver
 
@@ -64,7 +75,7 @@ The function returns a dictionary:
 
 This makes `solve5` a useful reference for measuring the accuracy of `solve4`. It is not the preferred general solution because the number of possible states grows exponentially with the input size.
 
-## Repository structure
+## 3. Repository structure
 
 TakeHomeTest/
 ├── main.py              Entry point and hand-written examples
@@ -79,7 +90,7 @@ TakeHomeTest/
 └── plots/               Generated accuracy and timing figures
 
 
-## File descriptions and connections
+## 4. File descriptions and connections
 
 ### `main.py`
 
@@ -177,7 +188,7 @@ This is the exact implementation under the corrected assumptions. It is used as 
 
 This directory contains generated PNG figures. The plots are outputs of `analysis.py`, rather than inputs to the solution. They record accuracy, the distribution of additional cuts and median execution time for individual solvers and for direct `solve4`/`solve5` comparisons.
 
-## Running the code
+## 5. Running the code
 
 The code requires Python together with NumPy and Matplotlib. From the repository directory, run:
 
@@ -187,7 +198,7 @@ The hand-written examples are printed first. The analysis then runs the configur
 
 The exact solver can become slow very quickly. The comparison in `main.py` therefore limits both `max_m` and `max_n` to 5, while the larger analysis only uses `solve4`.
 
-## Using the solvers directly
+## 6. Using the solvers directly
 
 ```python
 from solve4 import solve4
@@ -231,7 +242,7 @@ run_analysis(
 )
 ```
 
-## Trade-off
+## 7. Trade-off
 
 The final design deliberately keeps both a practical approximation and an exact reference:
 
@@ -241,7 +252,7 @@ The final design deliberately keeps both a practical approximation and an exact 
 The generated truth cases and comparison plots make that trade-off measurable rather than relying only on a few selected examples.
 
 
-## Analysis findings
+## 8. Analysis findings
 
 The generated tests measure both the accuracy and execution time of the approximate `solve4` algorithm. Each test case has a known minimum of `n - m` cuts.
 
