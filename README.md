@@ -135,9 +135,49 @@ This contains the reusable operations needed by the current solvers:
 
 ### `generate_truths.py`
 
-`gen_states()` creates random problems for which the exact minimum number of cuts is known.
+To measure accuracy, I need test problems where I already know the true minimum number of cuts. `generate_truths.py` creates these in reverse: it creates the children's targets first and then combines them to make the starting bars.
 
-It generates `n` target values, assigns every target to one of `m` non-empty groups, and constructs each starting bar as the sum of one group. The resulting problem uses all the chocolate and always has a construction requiring exactly (n - m) cuts. This is also a lower bound: starting with `m` pieces and supplying `n` positive allocations requires at least `n` pieces, while each cut increases the number of pieces by one.
+For a test with `m` bars and `n` children, it works as follows:
+
+1. Generate `n` random target amounts.
+2. Create `m` empty groups.
+3. Put one target into each group. This makes sure that no group is empty.
+4. Place every remaining target into a randomly chosen group.
+5. Add together the targets in each group. Each total becomes one starting bar.
+6. Shuffle both lists so the solver cannot use the original grouping or ordering.
+
+For example, the generated targets could be:
+
+```text
+[2,3,4,5]
+```
+
+They could be split into two hidden groups:
+
+```text
+[2,5] and [3,4]
+```
+
+These groups produce the starting bars:
+
+```text
+[7,7]
+```
+
+The known construction is to split each starting bar back into its original targets. A group containing `k` targets needs `k - 1` cuts. Across all `m` groups, the total is:
+
+```text
+(targets in group 1 - 1) + ... + (targets in group m - 1)
+= n - m
+```
+
+This proves that `n - m` cuts are enough.
+
+It is also impossible to use fewer. The test starts with `m` pieces and must supply `n` positive target amounts. Each cut increases the number of pieces by exactly one, so creating at least `n` pieces from `m` starting pieces requires at least `n - m` cuts.
+
+Therefore, `n - m` is both possible and the lowest possible value. This gives every generated trial a known true answer without needing to run the exact solver.
+
+The generator requires `m <= n`. If `m = n`, every group contains one target and the correct answer is zero cuts.
 
 The generator requires `m <= n`. This is why an analysis with `max_n = 5` cannot contain cases above `m = 5`.
 
