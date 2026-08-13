@@ -20,13 +20,6 @@ from helpers import *
 # Solve function 4 - takes start and target as input
 def solve4(start, target):
 
-    # Copy start and target
-    start = start.copy()
-    target = target.copy()
-
-    # Initialise number of cuts
-    cuts = 0
-
     # Calculate totals
     start_sum = sum(start)
     target_sum = sum(target)
@@ -35,10 +28,15 @@ def solve4(start, target):
     exact_target = True
     adjusted_target = target.copy()  
     if target_sum > start_sum:
-        target = reduce_targets(target,start_sum)
-        adjusted_target = target.copy()  
+        adjusted_target = reduce_targets(target,start_sum)
         exact_target = False
-        #return None
+        
+    # Copy start and target
+    start = start.copy()
+    target = adjusted_target.copy()
+
+    # Initialise number of cuts
+    cuts = 0
 
     # # Add dummy target for unused chocolate
     # NOTE - DUMMY ADDED TO 3) ONLY!
@@ -134,7 +132,6 @@ def solve4(start, target):
             cuts += 1
             # State-change: go back to step 1) 
             continue
-
 
         # This shouldn't be reached
         raise RuntimeError(
