@@ -82,5 +82,5 @@ for start,target in states:
 run_analysis(list(solutions.items())[0],max_n=30,n_tests=1000,seed=None)
 
 # Analyse solve4 vs solve5 for small m/n
-run_analysis(list(solutions.items()),max_n=5,max_m=5,n_tests=10000,seed=None)
+run_analysis(list(solutions.items()),max_n=5,max_m=5,n_tests=10000,seed=1)
 

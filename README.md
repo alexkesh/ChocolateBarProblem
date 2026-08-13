@@ -249,10 +249,26 @@ For small cases up to `m = n = 5`, both `solve4` and the exact `solve5` algorith
 
 The larger `solve4` analysis used up to 10 starting bars, 30 children and 1,000 tests per `(m,n)` combination. Its accuracy depended on the relationship between `m` and `n`. Accuracy was initially 100%, fell to approximately 68–80% for some intermediate cases, and generally recovered towards 96–100% as `n` approached 30.
 
-The cut-difference histogram complements this binary accuracy measure by showing how far the non-optimal results were from the minimum. A concentration at zero indicates exact solutions, while the size and spread of the positive tail show the frequency and severity of the approximation error.
+Plotting accuracy against `n/m` shows that the loss of accuracy is grouped most strongly around `n/m = 1.5–2`. At `n/m = 1`, every group created by the test generator contains exactly one target, so the starting bars and targets can be resolved by exact matching. Just above this ratio, only a small number of bars need to supply more than one target. These cases are tightly constrained: if the exact and two-sum checks do not find the correct grouping, the greedy fallback may allocate a complete smaller bar or cut a larger bar in a way which is locally sensible but prevents the globally optimal arrangement later. The common trough across several values of `m` is consistent with this limitation. It does not prove that every error has this cause, but it identifies the regime in which the lack of look-ahead is most costly.
+
+The cut-difference histogram complements the binary accuracy measure by showing how far the non-optimal results were from the minimum. Successful trials are excluded from the bars, while the annotation reports the total number and percentage of non-optimal trials. The size and spread of the remaining distribution therefore show both the frequency and severity of the approximation error.
 
 Median execution time increased smoothly with `n`, reaching approximately 100–120 microseconds at `n = 30`. The timing curves suggest non-linear growth, but remain controlled over the tested range.
 
-These results support using `solve4` as the main solution: it sacrifices a limited amount of accuracy on some inputs in exchange for much better scaling. `solve5` remains useful as an exact reference for small problems, but its exponential state-space growth makes it unsuitable as the general solution.
+These results support using `solve4` as the main solution: it sacrifices some accuracy on a recognisable region of the input space in exchange for much better scaling. `solve5` achieved 100% accuracy over the tested small cases and is designed to search for the global minimum. However, I could not empirically confirm 100% accuracy for larger `m` and `n`, because its exponential growth made a comparable number of trials impractical. The large-case plots therefore evaluate `solve4` against the known `n-m` minimum directly, rather than using `solve5` as an oracle.
+
+### Weaknesses and possible improvements
+
+The main weakness of `solve4` is that its fallback makes an irreversible local choice without considering how that choice affects the remaining bars and targets. The preliminary exact-match and two-sum checks avoid many unnecessary cuts, but they do not detect combinations involving three or more values. The result can also depend on which equally attractive candidate is chosen first. These limitations explain why `solve4` should be described as an approximation rather than a minimum-cut algorithm.
+
+Possible improvements include:
+
+- adding a bounded look-ahead before committing to a greedy allocation;
+- using a beam search to retain a small number of promising states rather than only one;
+- extending the direct matching stage with bounded subset-sum checks for combinations involving more than two values;
+- running the greedy solver with several deterministic tie-breaking strategies and keeping the best result; and
+- combining `solve4` with an exact branch-and-bound search which uses the greedy result as an initial upper bound and stops after a configurable time or state limit.
+
+These approaches would provide intermediate trade-offs between the speed of `solve4` and the guarantee offered by `solve5`. Further evaluation should use fixed seeds for paired solver comparisons, include deliberately difficult cases around `n/m = 1.5–2`, and test adversarial inputs rather than relying only on the random generator.
 
 Timing values are specific to the machine and Python environment used for the analysis. Accuracy results are also tied to the generated test distribution, whose target values are sampled between 1 and 20.
