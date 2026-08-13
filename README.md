@@ -301,7 +301,7 @@ Both analyses use `seed=1`. This makes the results repeatable and ensures that `
 
 The large `solve4` analysis tested up to 10 starting bars and 30 children. It ran 1,000 trials for every valid `(m,n)` pair, giving 255,000 trials in total.
 
-Relevant plots: [accuracy against `n`](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_vs_n.png) and [accuracy against `n/m`](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_vs_n_per_m.png).
+Relevant plots: [plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_vs_n.png](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_vs_n.png) and [plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_vs_n_per_m.png](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_vs_n_per_m.png).
 
 `solve4` found the minimum in 237,118 trials, or 92.99%. Of the 17,882 trials which missed the minimum:
 
@@ -313,7 +313,7 @@ No trial was more than three cuts above the minimum. Of the trials which missed 
 
 The cut-difference histograms show this distribution. Successful trials where the minimum was found are not shown. The y-axis still shows each group as a percentage of all trials. The information box gives the total number of trials and the number and percentage which missed the minimum. A logarithmic version is also produced so that the rare two-cut and three-cut errors remain visible.
 
-Relevant plots: [cut differences on a linear scale](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_cut_difference_histogram_linear.png) and [cut differences on a logarithmic scale](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_cut_difference_histogram_log.png).
+Relevant plots: [plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_cut_difference_histogram_linear.png](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_cut_difference_histogram_linear.png) and [plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_cut_difference_histogram_log.png](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_cut_difference_histogram_log.png).
 
 The accuracy of `solve4` depends strongly on the relationship between `m` and `n`. The accuracy plot against `n/m` shows the largest drop around `n/m = 1.5–2`.
 
@@ -325,19 +325,19 @@ Accuracy improves again as `n/m` increases. With more targets per starting bar, 
 
 For the smaller comparison, both `solve4` and `solve5` found the minimum in every test up to `m = n = 5`, using 10,000 trials for each valid `(m,n)` pair. However, I could not confirm the same result for `solve5` on larger cases because its computation time grew too quickly.
 
-Relevant plots: [combined accuracy against `n`](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_accuracy_vs_n.png) and [combined accuracy against `n/m`](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_accuracy_vs_n_per_m.png).
+Relevant plots: [plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_accuracy_vs_n.png](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_accuracy_vs_n.png) and [plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_accuracy_vs_n_per_m.png](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_accuracy_vs_n_per_m.png).
 
 ### Time results
 
 For the larger `solve4` analysis, median computation time increased smoothly as `n` increased and remained practical across the tested range.
 
-Relevant plots: [median time against `n`](plots/solve4_max_m_10_max_n_30_n_tests_1000_time_median_vs_n.png) and [median time against `n/m`](plots/solve4_max_m_10_max_n_30_n_tests_1000_time_median_vs_n_per_m.png).
+Relevant plots: [plots/solve4_max_m_10_max_n_30_n_tests_1000_time_median_vs_n.png](plots/solve4_max_m_10_max_n_30_n_tests_1000_time_median_vs_n.png) and [plots/solve4_max_m_10_max_n_30_n_tests_1000_time_median_vs_n_per_m.png](plots/solve4_max_m_10_max_n_30_n_tests_1000_time_median_vs_n_per_m.png).
 
 Median time is used because individual timing measurements appeared to be affected occasionally by background activity or other one-off delays. These unusually slow measurements pulled the mean upwards. The median gave a better measure of the typical time taken by a trial. The mean is still calculated and stored.
 
 For the small comparison, `solve5` was typically close to one order of magnitude slower than `solve4`. For the more difficult tested comparison cases, it was more than two orders of magnitude slower.
 
-Relevant plots: [combined median time against `n`](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_time_vs_n.png) and [combined median time against `n/m`](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_time_vs_n_per_m.png).
+Relevant plots: [plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_time_vs_n.png](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_time_vs_n.png) and [plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_time_vs_n_per_m.png](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_time_vs_n_per_m.png).
 
 This difference follows from how the two solutions work. `solve4` makes one sequence of choices and continues until all targets have been handled. `solve5` checks many different possible arrangements before it can confirm which one uses the fewest cuts. The number of possible arrangements grows quickly as the problem becomes more complicated.
 
