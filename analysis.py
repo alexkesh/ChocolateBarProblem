@@ -161,6 +161,7 @@ def plot_accuracy(func_name,summaries,n_tests):
         get_plot_filename(func_name,summaries,n_tests,"accuracy","vs_n"),
         bbox_inches="tight"
     )
+    plt.close(figure)
 
     # Create accuracy plot as a function of n/m
     figure = plt.figure()
@@ -184,6 +185,7 @@ def plot_accuracy(func_name,summaries,n_tests):
         get_plot_filename(func_name,summaries,n_tests,"accuracy","vs_n_per_m"),
         bbox_inches="tight"
     )
+    plt.close(figure)
 
 # Plot computation time as a function of n and n/m
 def plot_time(func_name,summaries,n_tests):
@@ -212,6 +214,7 @@ def plot_time(func_name,summaries,n_tests):
         get_plot_filename(func_name,summaries,n_tests,"time","median_vs_n"),
         bbox_inches="tight"
     )
+    plt.close(figure)
 
     # Create timing plot as a function of n/m
     figure = plt.figure()
@@ -234,6 +237,7 @@ def plot_time(func_name,summaries,n_tests):
         get_plot_filename(func_name,summaries,n_tests,"time","median_vs_n_per_m"),
         bbox_inches="tight"
     )
+    plt.close(figure)
 
 # Get the difference between cuts found and the known minimum for every trial
 def get_cut_differences(results):
@@ -317,6 +321,7 @@ def plot_cut_differences(results_by_func,summaries_by_func,n_tests):
                 ),
                 bbox_inches="tight"
             )
+            plt.close(figure)
 
     # Plot functions together when there is more than one
     if len(differences_by_func) > 1:
@@ -379,6 +384,7 @@ def plot_cut_differences(results_by_func,summaries_by_func,n_tests):
                 ),
                 bbox_inches="tight"
             )
+            plt.close(figure)
 
 # Plot results for multiple functions together
 def plot_comparison(summaries_by_func,n_tests,plot_type,plot_variant):
@@ -435,6 +441,7 @@ def plot_comparison(summaries_by_func,n_tests,plot_type,plot_variant):
         ),
         bbox_inches="tight"
     )
+    plt.close(figure)
 
 # Test accuracy and computation time as a function of n for different m
 def run_analysis(func,max_n=30,n_tests=1000,seed=None,max_m=10):
@@ -472,7 +479,7 @@ def run_analysis(func,max_n=30,n_tests=1000,seed=None,max_m=10):
         plot_comparison(summaries_by_func,n_tests,"time","vs_n")
         plot_comparison(summaries_by_func,n_tests,"time","vs_n_per_m")
 
-    plt.show()
+    #plt.show()
 
     # Return raw results so they can be analysed without rerunning trials
     if len(funcs) == 1:
