@@ -96,6 +96,8 @@ TakeHomeTest/
 ├── solve1.py            First attempt, retained for development history
 ├── solve2.py            Improved search using the original wrong assumption
 ├── solve3.py            Faster approach using the original wrong assumption
+├── AKeshavarzi_RiverlaneCodingChallenge-Notes_10-08-26.pdf
+│                          Handwritten notes from developing the solution
 └── plots/               Saved analysis figures
 ```
 
@@ -230,6 +232,10 @@ See above.
 ### `solve5.py`
 
 See above.
+
+### `AKeshavarzi_RiverlaneCodingChallenge-Notes_10-08-26.pdf`
+
+This PDF contains my handwritten notes from working through the problem and developing the solution. It is included to show my original reasoning and how the different approaches developed.
 
 ### `plots/`
 
