@@ -1,53 +1,19 @@
-import random
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from generate_truths import generate_truth_test
+from generate_truths import gen_states
 from solve4 import solve4
 
 # Generate all (m,n) cases for tests as a function of n
-def generate_size_cases(max_n=30,max_m=10):
-
+def generate_cases(max_n=30,max_m=10):
     # Store all cases
     cases = []
-
     # Loop over number of starting bars
     for m in range(1,max_m+1):
-
         # n must be >= m
         for n in range(m,max_n+1):
             cases.append((m,n))
-
-    # Return all cases
-    return cases
-
-# Generate all (m,n) cases for tests with fixed n/m
-def generate_ratio_cases(max_m=30,ratios=None):
-
-    # Ratios of number of children to number of starting bars
-    if ratios is None:
-        ratios = [1,1.5,2,2.5,3,4,5]
-
-    # Store all cases and their ratios
-    cases = []
-
-    # Loop over n/m ratios
-    for ratio in ratios:
-
-        # Loop over number of starting bars
-        for m in range(1,max_m+1):
-
-            # Calculate corresponding number of children
-            n = ratio*m
-
-            # Skip if n is not an integer
-            if not float(n).is_integer():
-                continue
-
-            # Store case
-            cases.append((m,int(n),ratio))
-
     # Return all cases
     return cases
 
@@ -61,7 +27,7 @@ def run_trials(m,n,n_tests):
     for i in range(n_tests):
 
         # Generate random test with known exact solution
-        start,target,truth = generate_truth_test(m,n)
+        start,target,truth = gen_states(m,n)
 
         # Copy inputs because solve4 modifies them
         test_start = start.copy()
@@ -152,15 +118,8 @@ def summarise_results(results):
 def get_m_cases(summaries,m):
     return sorted(case for case in summaries if case[0] == m)
 
-# Get cases for one value of n/m
-def get_ratio_cases(summaries,ratio):
-    return sorted(
-        case for case in summaries
-        if case[1]/case[0] == ratio
-    )
-
 # Plot accuracy as a function of n and n/m
-def plot_size_accuracy(summaries):
+def plot_accuracy(summaries):
 
     # Get all values of m
     m_values = sorted(set(m for m,n in summaries))
@@ -198,7 +157,7 @@ def plot_size_accuracy(summaries):
     plt.grid()
 
 # Plot computation time as a function of n and n/m
-def plot_size_time(summaries):
+def plot_time(summaries):
 
     # Get all values of m
     m_values = sorted(set(m for m,n in summaries))
@@ -233,77 +192,13 @@ def plot_size_time(summaries):
     plt.legend()
     plt.grid()
 
-# Plot accuracy as a function of m for fixed n/m
-def plot_ratio_accuracy(summaries,ratios):
-
-    # Create figure
-    plt.figure()
-
-    # Loop over n/m ratios
-    for ratio in ratios:
-        cases = get_ratio_cases(summaries,ratio)
-        m_values = [m for m,n in cases]
-        accuracies = [summaries[case]["accuracy"] for case in cases]
-        plt.plot(m_values,accuracies,label=f"n/m = {ratio}")
-
-    # Label and format axes
-    plt.xlabel("Number of starting bars, m")
-    plt.ylabel("Accuracy (%)")
-    plt.ylim(0,105)
-    plt.legend()
-    plt.grid()
-
-# Plot computation time as a function of m for fixed n/m
-def plot_ratio_time(summaries,ratios,fit_start=10):
-
-    # Create figure
-    plt.figure()
-
-    # Store calculated scaling exponents
-    exponents = {}
-
-    # Loop over n/m ratios
-    for ratio in ratios:
-        cases = get_ratio_cases(summaries,ratio)
-        m_values = np.array([m for m,n in cases])
-        median_times = np.array([
-            summaries[case]["median_time"] for case in cases
-        ])
-
-        # Plot this value of n/m
-        plt.loglog(m_values,median_times,label=f"n/m = {ratio}")
-
-        # Only fit larger problems
-        mask = m_values >= fit_start
-
-        # Need at least two points to fit a line
-        if np.count_nonzero(mask) >= 2:
-            slope,intercept = np.polyfit(
-                np.log(m_values[mask]),
-                np.log(median_times[mask]),
-                1
-            )
-
-            exponents[ratio] = slope
-            print(
-                f"n/m = {ratio}, "
-                f"large-m scaling exponent = {slope:.2f}"
-            )
-
-    # Label and format axes
-    plt.xlabel("Number of starting bars, m")
-    plt.ylabel("Median computation time (us)")
-    plt.legend()
-    plt.grid()
-
-    # Return calculated scaling exponents
-    return exponents
-
 # Test accuracy and computation time as a function of n for different m
-def test_by_size(max_n=30,n_tests=1000,seed=None):
+def run_analysis(max_n=30,n_tests=1000,seed=None):
 
-    # Generate and solve each trial once
-    cases = generate_size_cases(max_n)
+    # Generate all (m,n) cases for tests as a function of n
+    cases = generate_cases(max_n)
+    
+    # Solve each trial
     results = run_experiment(cases,n_tests,seed)
 
     # Calculate accuracy and timing from the same trials
@@ -312,46 +207,15 @@ def test_by_size(max_n=30,n_tests=1000,seed=None):
     # Print progress/results
     for m,n in sorted(summaries):
         summary = summaries[(m,n)]
-        print(
-            f"m = {m}, n = {n}, "
-            f"accuracy = {summary['accuracy']:.2f}%, "
-            f"median time = {summary['median_time']:.2f} us"
-        )
+        # print(
+        #     f"m = {m}, n = {n}, "
+        #     f"accuracy = {summary['accuracy']:.2f}%, "
+        #     f"median time = {summary['median_time']:.2f} us"
+        # )
 
     # Plot shared results
-    plot_size_accuracy(summaries)
-    plot_size_time(summaries)
-    plt.show()
-
-    # Return raw results so they can be analysed without rerunning trials
-    return results
-
-# Test accuracy and computation time as a function of m for fixed n/m
-def test_fixed_ratio(max_m=30,n_tests=1000,seed=None):
-
-    # Ratios of number of children to number of starting bars
-    ratios = [1,1.5,2,2.5,3,4,5]
-
-    # Generate and solve each trial once
-    ratio_cases = generate_ratio_cases(max_m,ratios)
-    cases = [(m,n) for m,n,ratio in ratio_cases]
-    results = run_experiment(cases,n_tests,seed)
-
-    # Calculate accuracy and timing from the same trials
-    summaries = summarise_results(results)
-
-    # Print progress/results
-    for m,n,ratio in ratio_cases:
-        summary = summaries[(m,n)]
-        print(
-            f"n/m = {ratio}, m = {m}, n = {n}, "
-            f"accuracy = {summary['accuracy']:.2f}%, "
-            f"median time = {summary['median_time']:.2f} us"
-        )
-
-    # Plot shared results
-    plot_ratio_accuracy(summaries,ratios)
-    plot_ratio_time(summaries,ratios)
+    plot_accuracy(summaries)
+    plot_time(summaries)
     plt.show()
 
     # Return raw results so they can be analysed without rerunning trials

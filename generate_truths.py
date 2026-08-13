@@ -1,7 +1,7 @@
 import random
 
-# Generate a random problem with a known exact minimum number of cuts
-def generate_truth_test(m,n,min_target=1,max_target=20):
+# Generate a random state with a known exact minimum number of cuts
+def gen_states(m,n,min_target=1,max_target=20):
 
     # Need at least as many targets as starting bars
     if m > n:

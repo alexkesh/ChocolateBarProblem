@@ -8,6 +8,9 @@ from solve3 import solve3
 from solve4 import solve4
 from solve5 import solve5
 
+# Import analysis functions
+from analysis import run_analysis#, test_fixed_ratio
+
 # Test arrays
 states = [
     [[6],[6]], # No cuts needed
@@ -28,7 +31,7 @@ solutions = {
     # "solve2" : solve2, # Global solution: exponential time, incorrectly implemented assumption (Jake, 11/08/26)
     # "solve3" : solve3, # Approximate solution: improved time, incorrectly implemented assumption (Jake, 11/08/26)
     "solve4" : solve4, # Approximate solution: improved time, correct assumptions (BEST SOLUTION)
-    "solve5" : solve5 # Global solution: exponential time, correct assumptions
+    #"solve5" : solve5 # Global solution: exponential time, correct assumptions
     }
 
 # Number of times to get repeat execution for average time
@@ -76,8 +79,5 @@ for start,target in states:
         print(f"\t                 avg time take for {n} reps = {mean_time*1e6:.4f} us, max time = {max_time*1e6:.4f} us")
         
 
-# test_accuracy(max_n=30,n_tests=1000)
-# test_accuracy_fixed_ratio(max_m=30,n_tests=1000)
-#test_time(max_n=30,n_tests=100)
-#test_time_fixed_ratio(max_m=30,n_tests=100)
-
+run_analysis(max_n=30,n_tests=1000,seed=None)
+#test_fixed_ratio(max_m=30,n_tests=1000,seed=None)
