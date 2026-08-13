@@ -14,10 +14,10 @@ states = [
     [[3,3],[6]], # Check that a child can be given several smaller pieces from different bars (Jake, 11/08/26)
     [[2, 5, 7],[4, 3, 2, 1]], # Provided example
     [[10, 15],[5, 5, 10, 5]], # Matching sum
+    [[1, 7, 7, 8],[3, 3, 6]], 
+    [[4, 4],[3, 3, 2]], 
     [[50, 30, 20],[10, 10, 10, 10, 10, 10, 10, 10, 10,10]], # Large matching sum, lots of children, all duplicates
-    [[23, 47, 31, 19, 12],[5, 7, 3, 9, 11, 13, 17, 2, 4, 6, 8, 10]], # Very large inputs
-    [[4, 4],[3, 3, 2]], # No solution
-    [[1, 7, 7, 8],[3, 3, 6]]
+    [[23, 47, 31, 19, 12],[5, 7, 3, 9, 11, 13, 17, 2, 4, 6, 8, 10]] # Very large inputs
 ]                
 
 # Number of times to get repeat execution for average time
@@ -61,7 +61,8 @@ for start,target in states:
     # cuts,mean_time = exec_timer(solve2(start,target),n) 
     # print(f"solve 2 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us")
     cuts,mean_time,max_time = exec_timer(solve3,start,target,n) 
-    print(f"solve 3 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6} us, max time = {max_time*1e6:.4f} us")
-    cuts,mean_time,max_time = exec_timer(solve4,start,target,n)
-    print(f"\tsolve 4 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6:.4f} us, max time = {max_time*1e6:.4f} us")
-B
+    print(f"\tsolve 3 results: number of cuts = {cuts}, avg time take for {n} reps = {mean_time*1e6:.4f} us, max time = {max_time*1e6:.4f} us")
+    result,mean_time,max_time = exec_timer(solve4,start,target,n)
+    print(f"\tsolve 4 results: {result}")
+    print(f"\t                 avg time take for {n} reps = {mean_time*1e6:.4f} us, max time = {max_time*1e6:.4f} us")
+

@@ -1,4 +1,4 @@
-# ---------------------------------------------A-------------
+# ----------------------------------A-----------A-------------
 # ATTEMPT 4
 # ***************************** 
 # To reach a target value, a child can be given several smaller pieces, and those can come from different bars.
@@ -15,64 +15,7 @@
 # - 
 # ---------------------------------------------------------- 
 
-# Remove any exact matches
-def remove_exact_matches(start, target):
-
-    # Dictionary of how many times each value appears in target
-    target_counts = {}
-
-    # Loop through target
-    for t in target:
-        # If this value already exists in the dictionary
-        if t in target_counts:
-            # Increase its count
-            target_counts[t] += 1
-        else:
-            # Else, add to dictionary
-            target_counts[t] = 1
-
-    # Initliase new start array (to contain unmatched values)
-    new_start = []
-
-    # Loop through start
-    for s in start:
-        # If there is an unused target exactly matching s
-        if s in target_counts and target_counts[s] > 0:
-            # Decrement the amount of times it appears in the target
-            target_counts[s] -= 1
-        # Otherwise, keep in start
-        else:
-            new_start.append(s)
-
-    # Initliase new target array (to contain unmatched values)
-    new_target = []
-
-    # Create new unmatched target array based on remaining counts
-    for t, count in target_counts.items():
-        new_target.extend([t] * count)
-
-    # Return unmatched start and target
-    return new_start, new_target
-
-# Two-sum algorithm to look for: values[i] + values[j] = targets[k]
-def two_sum(values, targets):
-
-    # Loop through all two-sum targets
-    for k, target in enumerate(targets):
-        # Initiliase dictionary of seen values
-        seen = {}
-        # Loop through all values to be summer
-        for j, value in enumerate(values):
-            # Find the difference value we hope to find
-            needed = target - value
-            # If that difference is in the seen values
-            if needed in seen:
-                # Return the indices of the found two-sum
-                return seen[needed], j, k
-            # Add to dictionary of seen values
-            seen[value] = j
-    # No two-sum found
-    return None
+from helpers import *
 
 # Solve function 4 - takes start and target as input
 def solve4(start, target):
@@ -89,14 +32,20 @@ def solve4(start, target):
     target_sum = sum(target)
 
     # Not enough chocolate
+    exact_target = True
+    adjusted_target = target.copy()  
     if target_sum > start_sum:
-        return None
+        target = reduce_targets(target,start_sum)
+        adjusted_target = target.copy()  
+        exact_target = False
+        #return None
 
     # # Add dummy target for unused chocolate
+    # NOTE - DUMMY ADDED TO 3) ONLY!
     # if start_sum > target_sum:
     #     target.append(start_sum - target_sum)
 
-    # Continue while there are still targets (including dummy)
+    # Continue while there are still targets
     while target:
 
         # 1) Look for and remove any exact matches between start and target (0 cuts)
@@ -193,4 +142,4 @@ def solve4(start, target):
             f"start={start}, target={target}, dummy={dummy}"
         )
 
-    return cuts
+    return {"cuts": cuts,"exact_target": exact_target,"target_used": adjusted_target}
