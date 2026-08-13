@@ -6,18 +6,26 @@ The main solution is `solve4.py`. It uses a fast greedy approximation intended t
 
 ## Problem interpretation
 
-I have used the following assumptions and constraints:
+I explicitly checked the following assumptions and constraints with Jake:
 
 - `start` is a list containing the sizes of the `m` starting chocolate bars.
 - `target` is a list containing the amounts requested by the `n` children.
 - All chocolate amounts are represented by positive integers.
+- One cut splits one existing piece into exactly two new pieces.
+- Both pieces created by a cut must have a size of at least one.
+- Giving an existing whole piece to a child requires no cut.
 - A child may receive several smaller pieces of chocolate.
 - Those pieces may come from different starting bars.
-- Giving an existing whole piece to a child requires no cut.
-- Splitting an existing piece requires one cut and creates two pieces.
-- Unused chocolate is allowed.
-- If there is not enough chocolate to satisfy the original requests, the targets are reduced proportionally while ensuring that every child receives at least one unit.
-- If there is not even one unit available per child, the problem cannot meet the fairness constraint and raises a `ValueError`.
+- Not all available chocolate has to be used. A remainder is allowed, so `sum(target)` may be less than `sum(start)`.
+- Ordering has no meaning. Neither input list is assumed to arrive sorted.
+- Duplicate values are allowed in both lists. The children do not all request the same amount, but their individual requests do not have to be unique.
+- A solution should not be assumed to exist. The program must handle cases where the children cannot all receive their requested amounts exactly.
+
+For the final point, I chose to handle an infeasible total request as follows:
+
+- If `sum(target) > sum(start)`, the targets are reduced proportionally to the available chocolate while ensuring that every child receives at least one unit.
+- The returned `exact_target` flag is set to `False`, and `target_used` records the adjusted allocation, so the caller can see that the original requests were not met exactly.
+- If there is not even one unit available per child, the fairness constraint cannot be met and `reduce_targets()` raises a `ValueError`.
 
 The important clarification is that one child's allocation does not need to come from one contiguous piece or one starting bar. For example: {start = [3,3], target = [6]} requires no cuts: both complete bars can be given to the same child. This clarification invalidated a restriction used in `solve1.py`, `solve2.py` and `solve3.py`, and motivated the current implementations.
 
