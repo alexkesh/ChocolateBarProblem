@@ -235,6 +235,151 @@ def plot_time(func_name,summaries,n_tests):
         bbox_inches="tight"
     )
 
+# Get the difference between cuts found and the known minimum for every trial
+def get_cut_differences(results):
+    return [
+        trial["result"]-trial["truth"]
+        for trials in results.values()
+        for trial in trials
+    ]
+
+# Plot a histogram of the additional cuts used above the known minimum
+def plot_cut_differences(results_by_func,summaries_by_func,n_tests):
+
+    # Get cut differences for each function
+    differences_by_func = {
+        func_name: get_cut_differences(results)
+        for func_name,results in results_by_func.items()
+    }
+
+    # Keep only trials where the function did not find the known minimum
+    errors_by_func = {
+        func_name: [difference for difference in differences if difference >= 1]
+        for func_name,differences in differences_by_func.items()
+    }
+
+    # Use common integer-centred bins so functions can be compared directly
+    max_difference = max(
+        [difference for errors in errors_by_func.values() for difference in errors],
+        default=1
+    )
+    bins = np.arange(0.5,max_difference+1.5,1)
+
+    # Get analysis limits to display on each histogram
+    all_summaries = next(iter(summaries_by_func.values()))
+    max_m = max(m for m,n in all_summaries)
+    max_n = max(n for m,n in all_summaries)
+
+    # Plot each function separately
+    for func_name,differences in differences_by_func.items():
+        errors = errors_by_func[func_name]
+        n_errors = len(errors)
+        error_percentage = 100*n_errors/len(differences)
+
+        # Produce both linear and logarithmic y-axis versions
+        for y_scale in ["linear","log"]:
+            figure = plt.figure()
+
+            if errors:
+                weights = np.ones(n_errors)*100/len(differences)
+                plt.hist(errors,bins=bins,weights=weights,edgecolor="black")
+            else:
+                plt.text(
+                    0.5,0.5,"No non-optimal trials",
+                    transform=plt.gca().transAxes,
+                    horizontalalignment="center",
+                    verticalalignment="center"
+                )
+
+            plt.title(f"{func_name}: error size for non-optimal trials")
+            plt.xlabel("Additional cuts above minimum")
+            plt.ylabel("Trials (% of total)")
+            plt.xticks(range(1,max_difference+1))
+            plt.yscale(y_scale)
+            if y_scale == "log" and not errors:
+                plt.ylim(0.1,100)
+            plt.grid(axis="y")
+            plt.text(
+                0.98,0.95,
+                f"max m = {max_m}\nmax n = {max_n}\n"
+                f"trials per (m,n) = {n_tests:,}\n"
+                f"non-optimal trials = {n_errors:,} ({error_percentage:.2f}%)\n"
+                f"total trials = {len(differences):,}",
+                transform=plt.gca().transAxes,
+                horizontalalignment="right",
+                verticalalignment="top",
+                bbox={"facecolor": "white","alpha": 0.8,"edgecolor": "grey"}
+            )
+            figure.savefig(
+                get_plot_filename(
+                    func_name,summaries_by_func[func_name],n_tests,
+                    "accuracy",f"cut_difference_histogram_{y_scale}"
+                ),
+                bbox_inches="tight"
+            )
+
+    # Plot functions together when there is more than one
+    if len(differences_by_func) > 1:
+        func_names = list(differences_by_func)
+        total_trials = len(next(iter(differences_by_func.values())))
+        error_summary = "\n".join(
+            f"{func_name} non-optimal = {len(errors):,} "
+            f"({100*len(errors)/len(differences_by_func[func_name]):.2f}%)"
+            for func_name,errors in errors_by_func.items()
+        )
+
+        # Produce both linear and logarithmic y-axis versions
+        for y_scale in ["linear","log"]:
+            figure = plt.figure()
+
+            for func_name,differences in differences_by_func.items():
+                errors = errors_by_func[func_name]
+
+                if errors:
+                    weights = np.ones(len(errors))*100/len(differences)
+                    plt.hist(
+                        errors,bins=bins,weights=weights,
+                        histtype="step",linewidth=2,label=func_name
+                    )
+                else:
+                    plt.plot([],[],label=f"{func_name} (no non-optimal trials)")
+
+            if not any(errors_by_func.values()):
+                plt.text(
+                    0.5,0.5,"No non-optimal trials",
+                    transform=plt.gca().transAxes,
+                    horizontalalignment="center",
+                    verticalalignment="center"
+                )
+
+            plt.title("Error size comparison for non-optimal trials")
+            plt.xlabel("Additional cuts above minimum")
+            plt.ylabel("Trials (% of total)")
+            plt.xticks(range(1,max_difference+1))
+            plt.yscale(y_scale)
+            if y_scale == "log" and not any(errors_by_func.values()):
+                plt.ylim(0.1,100)
+            plt.legend(loc="upper left")
+            plt.grid(axis="y")
+            plt.text(
+                0.98,0.95,
+                f"max m = {max_m}\nmax n = {max_n}\n"
+                f"trials per (m,n) = {n_tests:,}\n"
+                f"{error_summary}\n"
+                f"total trials per function = {total_trials:,}",
+                transform=plt.gca().transAxes,
+                horizontalalignment="right",
+                verticalalignment="top",
+                bbox={"facecolor": "white","alpha": 0.8,"edgecolor": "grey"}
+            )
+            figure.savefig(
+                get_plot_filename(
+                    "_vs_".join(func_names),all_summaries,n_tests,
+                    "combined_accuracy",f"cut_difference_histogram_{y_scale}"
+                ),
+                bbox_inches="tight"
+            )
+
 # Plot results for multiple functions together
 def plot_comparison(summaries_by_func,n_tests,plot_type,plot_variant):
 
@@ -316,6 +461,9 @@ def run_analysis(func,max_n=30,n_tests=1000,seed=None,max_m=10):
         # Plot each function separately
         plot_accuracy(current_func[0],summaries,n_tests)
         plot_time(current_func[0],summaries,n_tests)
+
+    # Plot how far each trial was from the known minimum
+    plot_cut_differences(results_by_func,summaries_by_func,n_tests)
 
     # Plot all functions together when there is more than one
     if len(funcs) > 1:

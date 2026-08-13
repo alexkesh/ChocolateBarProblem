@@ -9,7 +9,7 @@ from solve4 import solve4
 from solve5 import solve5
 
 # Import analysis functions
-from analysis import run_analysis#, test_fixed_ratio
+from analysis import run_analysis
 
 # Test arrays
 states = [
