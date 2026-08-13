@@ -2,7 +2,7 @@
 
 This repository contains my solution to the chocolate bar cutting problem. Given `m` starting chocolate bars and the requested amounts for `n` children, the aim is to distribute the requested chocolate using as few cuts as possible.
 
-The main solution is `solve4.py`. It uses an approximate solution intended to remain practical as the inputs grow. `solve5.py` finds the exact minimum and provides an exact reference solution for smaller cases, but has exponential time complexity. The earlier solver files have been retained to be as transparent as possible and show how the approach developed as I tested the problem and clarified its assumptions.
+The main solution is `solve4.py`. It is an approximate solution intended to remain practical as the inputs grow. `solve5.py` finds the exact minimum and provides a reference solution for smaller cases, but has exponential time complexity. The earlier solver files have been retained to be as transparent as possible and show how the approach developed as I tested the problem and clarified its assumptions.
 
 ## Contents
 
@@ -12,8 +12,7 @@ The main solution is `solve4.py`. It uses an approximate solution intended to re
 4. [File descriptions and connections](#4-file-descriptions-and-connections)
 5. [Running the code](#5-running-the-code)
 6. [Using the solvers directly](#6-using-the-solvers-directly)
-7. [Trade-off](#7-trade-off)
-8. [Analysis findings](#8-analysis-findings)
+7. [Analysis findings](#7-analysis-findings)
 
 ## 1. Problem interpretation
 
@@ -32,7 +31,7 @@ I explicitly checked the following assumptions and constraints with Jake:
 - Duplicate values are allowed in both lists. The children do not all request the same amount, but their individual requests do not have to be unique.
 - A solution should not be assumed to exist. The program must handle cases where the children cannot all receive their requested amounts exactly.
 
-For the final point, there is only no solution ff `sum(target) > sum(start). I chose to handle this as follows:
+For the final point, an exact solution is impossible only if `sum(target) > sum(start)`. I chose to handle this as follows:
 
 - If `sum(target) > sum(start)`, the targets are reduced proportionally to the available chocolate while ensuring that every child receives at least one unit.
 - The returned `exact_target` flag is set to `False`, and `target_used` records the adjusted allocation, so the caller can see that the original requests were not met exactly.
@@ -58,7 +57,7 @@ requires no cuts: both complete bars can be given to the same child. This clarif
 3. Match one bar to two targets, including a possible dummy target representing unused chocolate. This requires one cut.
 4. If none of these matches work:
    - take the largest complete bar smaller than the largest target and give it to that child; or
-   - take the smallest bar larger than the target and cut off the exact amount neede
+   - take the smallest bar larger than the target and cut off the exact amount needed.
 
 This last step is a local rather than global optimisation. It does not check every possible effect on later choices. This makes the solution fast, avoiding exponential growth, but means it does not always find the minimum number of cuts.
 
@@ -82,7 +81,7 @@ The function returns a dictionary:
 - Splitting a piece costs one cut, so the resulting state is placed at the back.
 - A `best` dictionary records the smallest number of cuts used to reach each sorted state and prevents inferior repeated work.
 
-This method finds the minimum number of cuts, but the number of possible states grows very quickly. It is useful for checking `solve4` on small problems, but it is not practical for running larger states. It is not the preferred solution because the number of possible states grows exponentially with the input size.
+This method finds the minimum number of cuts, but the number of possible states grows very quickly. It is useful for checking `solve4` on small problems, but it is not practical for running larger problems. It is not the preferred solution because the number of possible states grows exponentially with the input size.
 
 ## 3. Repository structure
 
@@ -167,8 +166,7 @@ These groups produce the starting bars:
 The known construction is to split each starting bar back into its original targets. A group containing `k` targets needs `k - 1` cuts. Across all `m` groups, the total is:
 
 ```text
-(targets in group 1 - 1) + ... + (targets in group m - 1)
-= n - m
+(targets in group 1 - 1) + ... + (targets in group m - 1) = n - m
 ```
 
 This proves that `n - m` cuts are enough.
@@ -177,9 +175,7 @@ It is also impossible to use fewer. The test starts with `m` pieces and must sup
 
 Therefore, `n - m` is both possible and the lowest possible value. This gives every generated trial a known true answer without needing to run the exact solver.
 
-The generator requires `m <= n`. If `m = n`, every group contains one target and the correct answer is zero cuts.
-
-The generator requires `m <= n`. This is why an analysis with `max_n = 5` cannot contain cases above `m = 5`.
+The generator requires `m <= n`. This is why an analysis with `max_n = 5` cannot contain cases above `m = 5`. If `m = n`, every group contains one target and the correct answer is zero cuts.
 
 ### `analysis.py`
 
@@ -194,55 +190,58 @@ This module connects the random generator to one or more solver functions. For e
 
 When given several solvers, `run_analysis()` creates separate figures for each solver and combined figures for direct comparison. Colours distinguish values of `m`, while line styles distinguish solver functions. Point markers ensure that a series containing only one valid case, such as `m = n = 5`, remains visible.
 
+The plots show:
+
+- accuracy against `n`;
+- accuracy against `n/m`;
+- median computation time against `n`;
+- median computation time against `n/m`; and
+- the number of extra cuts used when the minimum was not found.
+
 The cut-difference histogram gives more information than the percentage accuracy alone. For each trial it calculates:
 
 ```text
 cuts found - known minimum cuts
 ```
-
-A value of zero means that the solver found an optimal solution, so these successful trials are excluded from the histogram. The remaining positive values show how many unnecessary cuts were used when the solver did not find the minimum. The y-axis shows the percentage of all trials in each error-size bin. The bar heights therefore retain information about both the frequency and severity of non-optimal results, while omitting the usually dominant zero bin keeps the errors visible.
+A value of zero means that the solver found an optimal solution—these successful trials are excluded from the histogram. The remaining positive values show how many unnecessary cuts were used when the solver did not find the minimum. The y-axis shows the percentage of all trials.
 
 Each histogram displays the maximum `m`, maximum `n`, number of trials per `(m,n)` case, number and percentage of non-optimal trials, and total number of trials represented. Individual histograms are produced for each solver, together with an overlaid comparison when more than one solver is analysed. Every histogram is saved twice: a linear y-axis version gives the clearest view of the most common errors, while a logarithmic version makes rare error sizes easier to see. If every trial is optimal, the plot states that there were no non-optimal trials.
 
-Plot filenames include the solver name, maximum `m`, maximum `n`, number of tests, measurement type and axis variant. This prevents the different figures from overwriting one another. Generated figures are saved in `plots/`.
+Plot filenames include the solver name, maximum `m`, maximum `n`, number of tests, measurement type and axis variant. Generated figures are saved in `plots/`.
 
 For a fair solver-to-solver comparison, pass a fixed seed. `run_experiment()` resets the random generator for each solver, so a shared seed makes them receive the same sequence of test problems. With `seed=None`, each solver receives a different random sample.
 
 ### `solve1.py`
 
-This is the original breadth-first search. It tries every possible split of every remaining bar and therefore explores a very large number of states. It does not track visited states, uses an inefficient list as a queue and does not robustly handle branches with no solution.
-
-It is retained as a record of the first approach, but is not used by `main.py` because it is both incomplete and computationally impractical.
+This is my initial breadth-first search (BFS) implementation. It tries every possible split of every remaining bar and therefore explores a very large number of states. It does not track visited states, uses an inefficient list as a queue and does not robustly handle branches with no solution. It is retained as a record of the first approach, but is not used by `main.py`.
 
 ### `solve2.py`
 
-This improves the first breadth-first search by using a `deque`, tracking visited states, restricting candidate cuts to target values and pruning branches which cannot satisfy the remaining requests.
-
-Despite these improvements, its state space still grows exponentially. More importantly, it retains the original incorrect assumption that each child's amount must be obtained as a single piece. It is therefore retained for development history but is not used in the current comparison.
+This improves my first breadth-first search (BFS) by using a `deque`, tracking visited states, restricting candidate cuts to target values and pruning branches which cannot satisfy the remaining requests. Despite these improvements, its state space still grows exponentially. More importantly, it retains the original incorrect assumption that each child's amount must be obtained as a single piece.
 
 ### `solve3.py`
 
-This replaces the exponential search with a greedy allocation. Targets are processed from largest to smallest and assigned to the bar which leaves the smallest remainder. The resulting algorithm is much faster, but it still assumes that each child must receive one piece from one bar.
-
-That assumption means it rejects valid cases such as `start = [3,3]`, `target = [6]`. It is retained to document the transition from exhaustive to approximate methods, but is no longer used.
+This replaces the exponential search with my first approximate solution to avoid exponential time. Targets are processed from largest to smallest and assigned to the bar which leaves the smallest remainder. The resulting algorithm is much faster, but still suffers from the incorrect assumption that each child must receive one piece from one bar. It is retained as a record of staged approaches, but is not used by `main.py`.
 
 ### `solve4.py`
 
-This is the preferred solution. It incorporates the clarified rule that children may receive multiple pieces from multiple bars, combines zero- and one-cut matching with a greedy fallback, and scales to substantially larger test cases than an exhaustive search.
+See above.
 
 ### `solve5.py`
 
-This is the exact implementation under the corrected assumptions. It is used as a small-case benchmark for `solve4`, not as the main solver, because its exhaustive state search becomes expensive as `m`, `n` and the bar sizes grow.
+See above.
 
 ### `plots/`
 
-This directory contains generated PNG figures. The plots are outputs of `analysis.py`, rather than inputs to the solution. They record accuracy, the distribution of additional cuts and median execution time for individual solvers and for direct `solve4`/`solve5` comparisons.
+This directory contains generated PNG figures. The plots are outputs of `analysis.py`. They record accuracy, the distribution of additional cuts and execution time for individual solvers and for direct `solve4`/`solve5` comparisons.
 
 ## 5. Running the code
 
 The code requires Python together with NumPy and Matplotlib. From the repository directory, run:
 
+```bash
 python main.py
+```
 
 The hand-written examples are printed first. The analysis then runs the configured random trials, displays the figures and saves them under `plots/`.
 
@@ -292,52 +291,73 @@ run_analysis(
 )
 ```
 
-## 7. Trade-off
+## 7. Analysis findings
 
-The final design deliberately keeps both a practical approximation and an exact reference:
+The generated tests measure the accuracy and computation time of `solve4`. Each test has a known minimum of `n - m` cuts.
 
-- `solve4` prioritises useful execution time and generally gets close to the minimum number of cuts.
-- `solve5` guarantees the global minimum, but only remains practical for small inputs.
+Both analyses use `seed=1`. This makes the results repeatable and ensures that `solve4` and `solve5` receive the same problems when they are compared.
 
-The generated truth cases and comparison plots make that trade-off measurable rather than relying only on a few selected examples.
+### Accuracy results
 
+The large `solve4` analysis tested up to 10 starting bars and 30 children. It ran 1,000 trials for every valid `(m,n)` pair, giving 255,000 trials in total.
 
-## 8. Analysis findings
+Relevant plots: [accuracy against `n`](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_vs_n.png) and [accuracy against `n/m`](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_vs_n_per_m.png).
 
-The generated tests measure both the accuracy and execution time of the approximate `solve4` algorithm. Each test case has a known minimum of `n - m` cuts.
+`solve4` found the minimum in 237,118 trials, or 92.99%. Of the 17,882 trials which missed the minimum:
 
-For small cases up to `m = n = 5`, both `solve4` and the exact `solve5` algorithm achieved 100% accuracy across 10,000 generated tests per `(m,n)` combination. However, `solve5` became substantially slower as the problem size increased, reaching hundreds of microseconds for some cases while `solve4` remained close to a few microseconds.
+- 17,424 were one extra cut above the minimum;
+- 452 were two extra cuts above the minimum; and
+- 6 were three extra cuts above the minimum.
 
-The larger `solve4` analysis used up to 10 starting bars, 30 children and 1,000 tests per `(m,n)` combination. Its accuracy depended on the relationship between `m` and `n`. Accuracy was initially 100%, fell to approximately 68–80% for some intermediate cases, and generally recovered towards 96–100% as `n` approached 30.
+No trial was more than three cuts above the minimum. Of the trials which missed the minimum, 97.44% were only one cut away. Therefore, `solve4` did not always find the best answer, but almost every incorrect result was very close to it.
 
-Plotting accuracy against `n/m` shows that the loss of accuracy is grouped most strongly around `n/m = 1.5–2`. At `n/m = 1`, every group created by the test generator contains exactly one target, so the starting bars and targets can be resolved by exact matching. Just above this ratio, only a small number of bars need to supply more than one target. These cases are tightly constrained: if the exact and two-sum checks do not find the correct grouping, the greedy fallback may allocate a complete smaller bar or cut a larger bar in a way which is locally sensible but prevents the globally optimal arrangement later. The common trough across several values of `m` is consistent with this limitation. It does not prove that every error has this cause, but it identifies the regime in which the lack of look-ahead is most costly.
+The cut-difference histograms show this distribution. Successful trials where the minimum was found are not shown. The y-axis still shows each group as a percentage of all trials. The information box gives the total number of trials and the number and percentage which missed the minimum. A logarithmic version is also produced so that the rare two-cut and three-cut errors remain visible.
 
-The cut-difference histogram complements the binary accuracy measure by showing how far the non-optimal results were from the minimum. Successful trials are excluded from the bars, while the annotation reports the total number and percentage of non-optimal trials. The size and spread of the remaining distribution therefore show both the frequency and severity of the approximation error.
+Relevant plots: [cut differences on a linear scale](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_cut_difference_histogram_linear.png) and [cut differences on a logarithmic scale](plots/solve4_max_m_10_max_n_30_n_tests_1000_accuracy_cut_difference_histogram_log.png).
 
-The large `solve4` analysis was repeated with `seed=1` and contained 255,000 trials in total. Of these, 237,118 (92.99%) found the known minimum and 17,882 (7.01%) did not. Encouragingly, the approximation errors were heavily concentrated close to the optimum: 17,424 trials were one additional cut above the minimum. This represents 6.83% of all trials and 97.44% of the non-optimal trials. Only 452 trials (0.177% of all trials) were two cuts above the minimum, and 6 trials (0.00235%) were three cuts above it. No trial in this analysis used more than three additional cuts. Therefore, although `solve4` does not always find the global minimum, almost every failure in the tested distribution was only one cut away.
+The accuracy of `solve4` depends strongly on the relationship between `m` and `n`. The accuracy plot against `n/m` shows the largest drop around `n/m = 1.5–2`.
 
-Median execution time for `solve4` increased smoothly with `n`, reaching approximately 100–120 microseconds at `n = 30`. The timing curves suggest non-linear growth, but remain controlled over the tested range.
+When `n/m = 1`, every generated starting bar corresponds to one target, so the problem can be solved using exact matches. Just above this value, only some bars need to supply more than one target. There are fewer ways to group the values correctly.
 
-The seeded comparison for `m,n <= 5` demonstrates the cost of the exact search more clearly. `solve5` was generally around one order of magnitude slower than `solve4`, and more than two orders of magnitude slower for the most difficult tested cases. This widening gap is consistent with their designs: `solve4` follows one sequence of local decisions, whereas `solve5` may need to explore many alternative states before confirming the minimum.
+If the direct matching steps do not find the correct grouping, the final approximation step may make a choice which appears useful at the time but prevents the best arrangement later. For example, it may give away a complete smaller bar or cut a larger bar without checking how that choice affects the remaining targets. Although not confirmed, this appears to be why the lack of look-ahead causes the most problems around `n/m = 1.5–2`.
 
-The runtime is not determined by `m` and `n` alone. For example, `(5,5)` was easier for `solve5` than `(3,5)` or `(4,5)`, because cases with `m = n` generated by this test method consist of one target per starting bar and can be resolved through direct allocations. The difficult cases are those which expose many competing intermediate states. Nevertheless, the rapid increase for some cases near the upper end of this small test range shows why extending the 10,000-trial comparison beyond `m,n = 5` was not practical. This does not mean that `solve5` cannot solve any individual larger problem; it means that completing enough repeated random trials for a reliable like-for-like statistical comparison becomes prohibitively expensive and unpredictable.
+Accuracy improves again as `n/m` increases. With more targets per starting bar, there are more possible ways to divide the available chocolate and still reach the known minimum.
 
-These timings describe this particular Python environment and run, so the orders-of-magnitude difference is more informative than individual microsecond measurements.
+For the smaller comparison, both `solve4` and `solve5` found the minimum in every test up to `m = n = 5`, using 10,000 trials for each valid `(m,n)` pair. However, I could not confirm the same result for `solve5` on larger cases because its computation time grew too quickly.
 
-These results support using `solve4` as the main solution: it sacrifices some accuracy on a recognisable region of the input space in exchange for much better scaling. `solve5` achieved 100% accuracy over the tested small cases and is designed to search for the global minimum. However, I could not empirically confirm 100% accuracy for larger `m` and `n`, because its exponential growth made a comparable number of trials impractical. The large-case plots therefore evaluate `solve4` against the known `n-m` minimum directly, rather than using `solve5` as an oracle.
+Relevant plots: [combined accuracy against `n`](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_accuracy_vs_n.png) and [combined accuracy against `n/m`](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_accuracy_vs_n_per_m.png).
 
-### Weaknesses and possible improvements
+### Time results
 
-The main weakness of `solve4` is that its fallback makes an irreversible local choice without considering how that choice affects the remaining bars and targets. The preliminary exact-match and two-sum checks avoid many unnecessary cuts, but they do not detect combinations involving three or more values. The result can also depend on which equally attractive candidate is chosen first. These limitations explain why `solve4` should be described as an approximation rather than a minimum-cut algorithm.
+For the larger `solve4` analysis, median computation time increased smoothly as `n` increased and remained practical across the tested range.
 
-Possible improvements include:
+Relevant plots: [median time against `n`](plots/solve4_max_m_10_max_n_30_n_tests_1000_time_median_vs_n.png) and [median time against `n/m`](plots/solve4_max_m_10_max_n_30_n_tests_1000_time_median_vs_n_per_m.png).
 
-- adding a bounded look-ahead before committing to a greedy allocation;
-- using a beam search to retain a small number of promising states rather than only one;
-- extending the direct matching stage with bounded subset-sum checks for combinations involving more than two values;
-- running the greedy solver with several deterministic tie-breaking strategies and keeping the best result; and
-- combining `solve4` with an exact branch-and-bound search which uses the greedy result as an initial upper bound and stops after a configurable time or state limit.
+Median time is used because individual timing measurements appeared to be affected occasionally by background activity or other one-off delays. These unusually slow measurements pulled the mean upwards. The median gave a better measure of the typical time taken by a trial. The mean is still calculated and stored.
 
-These approaches would provide intermediate trade-offs between the speed of `solve4` and the guarantee offered by `solve5`. Further evaluation should use fixed seeds for paired solver comparisons, include deliberately difficult cases around `n/m = 1.5–2`, and test adversarial inputs rather than relying only on the random generator.
+For the small comparison, `solve5` was typically close to one order of magnitude slower than `solve4`. For the more difficult tested comparison cases, it was more than two orders of magnitude slower.
 
-Timing values are specific to the machine and Python environment used for the analysis. Accuracy results are also tied to the generated test distribution, whose target values are sampled between 1 and 20.
+Relevant plots: [combined median time against `n`](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_time_vs_n.png) and [combined median time against `n/m`](plots/solve4_vs_solve5_max_m_5_max_n_5_n_tests_10000_combined_time_vs_n_per_m.png).
+
+This difference follows from how the two solutions work. `solve4` makes one sequence of choices and continues until all targets have been handled. `solve5` checks many different possible arrangements before it can confirm which one uses the fewest cuts. The number of possible arrangements grows quickly as the problem becomes more complicated.
+
+Running time is affected by both the size and structure of a problem. In the generated tests, when `m = n`, each starting bar is formed from exactly one target. These cases can be resolved through exact matches, which is why `(5,5)` can be easier than some cases with smaller `m` but more possible ways of assigning the chocolate.
+
+Testing `solve5` beyond `m,n = 5` was not practical when running 10,000 trials for every pair. This does not mean that `solve5` cannot solve an individual larger problem. It means that running enough larger trials for a fair and useful comparison becomes too slow and unpredictable. For this reason, `solve5` is useful as an exact check for small cases, while `solve4` is the more practical choice for larger inputs.
+
+### Weaknesses, possible improvements and conclusions
+
+The main weakness of `solve4` is that its final approximation step makes one local choice at a time without checking how that choice affects the rest of the problem. Once a bar has been assigned or cut, that choice cannot be changed later.
+
+The direct matching steps also check matches involving only one or two values. They potentially miss a better arrangement involving three or more bars or targets.
+
+The two main improvements I would investigate are:
+
+- adding a limited look-ahead before choosing the next allocation; and
+- extending the matching stage to check useful combinations of more than two values.
+
+Both changes could improve accuracy, particularly around `n/m = 1.5–2`, but would have to be profiled in terms of the extra computation required.
+
+The analyses reported here use a fixed random seed (`seed=1`) so that the results can be repeated and both solvers receive the same test problems. As a further check, I would repeat the analysis with several different seeds to confirm that the accuracy pattern, cut-difference distribution and computation-time comparison remain similar across different random samples.
+
+However, overall the results support using `solve4` as the main solution. It is not guaranteed to find the minimum, but it remained practical across the larger test range and almost every incorrect result was only one cut above the minimum. `solve5` provides an exact comparison for small problems, but its running time grows too quickly for the larger analysis.
