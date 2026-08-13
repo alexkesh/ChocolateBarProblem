@@ -38,7 +38,14 @@ For the final point, there is only no solution ff `sum(target) > sum(start). I c
 - The returned `exact_target` flag is set to `False`, and `target_used` records the adjusted allocation, so the caller can see that the original requests were not met exactly.
 - If there is not even one unit available per child, a self-imposed "fairness" constraint cannot be met and `reduce_targets()` raises a `ValueError`.
 
-The important clarification is that one child's allocation does not need to come from one piece or one starting bar. For example: {start = [3,3], target = [6]} requires no cuts: both complete bars can be given to the same child. This clarification invalidated a restriction used in `solve1.py`, `solve2.py` and `solve3.py`, and motivated the current implementations.
+The important clarification is that one child's allocation does not need to come from one piece or one starting bar. For example: 
+
+```python
+start = [3,3]
+target = [6]
+```
+
+requires no cuts: both complete bars can be given to the same child. This clarification invalidated a restriction used in `solve1.py`, `solve2.py` and `solve3.py`, and motivated the current implementations.
 
 ## 2. Current approach
 
@@ -57,11 +64,13 @@ This last step is a local rather than global optimisation. It does not check eve
 
 The function returns a dictionary:
 
+```python
 {
     "cuts": cuts,
     "exact_target": exact_target,
     "target_used": adjusted_target
 }
+```
 
 `exact_target` records whether the original request could be met. If there was insufficient chocolate, `target_used` contains the proportionally reduced allocation used by the solver.
 
